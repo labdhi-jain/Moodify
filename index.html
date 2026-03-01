@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moodify Emotion Detection</title>
+</head>
+<body>
+    <h2>Moodify - Live Emotion Detection</h2>
+
+    <video id="video" width="400" autoplay></video>
+    <br><br>
+    <button onclick="capture()">Detect Emotion</button>
+
+    <h3 id="result"></h3>
+
+    <script>
+        const video = document.getElementById("video");
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            });
+
+        function capture() {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const context = canvas.getContext("2d");
+            context.drawImage(video, 0, 0);
+
+            const imageData = canvas.toDataURL("image/jpeg");
+
+            fetch("http://127.0.0.1:5000/detect-emotion", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = "Emotion: " + data.emotion;
+            });
+        }
+    </script>
+</body>
+</html>
