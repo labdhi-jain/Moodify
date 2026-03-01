@@ -48,9 +48,14 @@ def detect_emotion():
         roi_gray = np.reshape(roi_gray, (1, 48, 48, 1))
 
         prediction = model.predict(roi_gray)
-        emotion = emotion_labels[np.argmax(prediction)]
+        emotion_index = np.argmax(prediction)
+        emotion = emotion_labels[emotion_index]
+        confidence = float(np.max(prediction)) * 100
 
-        return jsonify({"emotion": emotion})
+        return jsonify({
+            "emotion": emotion,
+            "confidence": f"{confidence:.2f}%"
+        })
 
 
 if __name__ == "__main__":
