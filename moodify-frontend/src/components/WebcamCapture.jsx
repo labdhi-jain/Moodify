@@ -1,12 +1,26 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
+import axios from "axios";
 
 const WebcamCapture = () => {
   const webcamRef = useRef(null);
+  const [emotion, setEmotion] = useState("");
+  const [confidence, setConfidence] = useState("");
 
-  const capture = () => {
+  const capture = async () => {
     const imageSrc = webcamRef.current.getScreenshot();
-    console.log(imageSrc); // we’ll send this to backend later
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/detect-emotion",
+        { image: imageSrc }
+      );
+
+      setEmotion(response.data.emotion);
+      setConfidence(response.data.confidence);
+    } catch (error) {
+      console.error("Error detecting emotion:", error);
+    }
   };
 
   return (
@@ -17,7 +31,15 @@ const WebcamCapture = () => {
         screenshotFormat="image/jpeg"
         width={400}
       />
-      <button onClick={capture}>Capture</button>
+      <br />
+      <button onClick={capture}>Detect Emotion</button>
+
+      {emotion && (
+        <div>
+          <h2>Emotion: {emotion}</h2>
+          <h3>Confidence: {confidence}</h3>
+        </div>
+      )}
     </div>
   );
 };
